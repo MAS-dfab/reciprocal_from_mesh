@@ -117,8 +117,8 @@ class ReciprocalFrame(Graph):
         """Export beams as COMPAS Lines."""
         return [self.node_attribute(key, 'beam') for key in self.nodes()]
     
-    def to_connectors(self):
-        """Export connector lines between beams at eccentricity points.
+    def get_connection_lines(self):
+        """Get eccentricity lines between connected beams.
         
         Computes the shortest distance line between each pair of connected
         beams using plane intersection method (works for skew lines).
