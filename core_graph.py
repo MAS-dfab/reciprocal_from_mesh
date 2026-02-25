@@ -12,7 +12,7 @@ from scipy.optimize import least_squares
 from scipy.sparse import lil_matrix
 
 from compas.datastructures import Graph, Mesh
-from compas.geometry import Line, Point, midpoint_line
+from compas.geometry import Line, Point, Plane, midpoint_line, intersection_line_plane
 
 class ReciprocalFrame(Graph):
     """
@@ -116,6 +116,56 @@ class ReciprocalFrame(Graph):
     def to_lines(self):
         """Export beams as COMPAS Lines."""
         return [self.node_attribute(key, 'beam') for key in self.nodes()]
+    
+    def to_connectors(self):
+        """Export connector lines between beams at eccentricity points.
+        
+        Computes the shortest distance line between each pair of connected
+        beams using plane intersection method (works for skew lines).
+        
+        Returns: list of COMPAS Lines
+        """
+        connectors = []
+        seen = set()
+        
+        for beam_i, end_i, beam_j, end_j, xi in self.get_connections():
+            # Avoid duplicates for same beam pair
+            pair_key = tuple(sorted((beam_i, beam_j)))
+            if pair_key in seen:
+                continue
+            seen.add(pair_key)
+            
+            line_i = self.get_beam(beam_i)
+            line_j = self.get_beam(beam_j)
+            
+            # Cross product gives direction perpendicular to both lines
+            cross_p = line_i.direction.cross(line_j.direction)
+            
+            # Skip if lines are parallel (cross product is zero)
+            if cross_p.length < 1e-10:
+                continue
+            
+            # Find intersection points via plane intersection
+            # q1: where line_i intersects the plane through line_j
+            plane_j = Plane(
+                point=line_j.midpoint,
+                normal=cross_p.cross(line_j.direction)
+            )
+            q1 = intersection_line_plane(line_i, plane_j)
+            
+            # q2: where line_j intersects the plane through line_i
+            plane_i = Plane(
+                point=line_i.midpoint,
+                normal=cross_p.cross(line_i.direction)
+            )
+            q2 = intersection_line_plane(line_j, plane_i)
+            
+            if q1 is not None and q2 is not None:
+                dist = Point(*q1).distance_to_point(Point(*q2))
+                if dist > 1e-6:
+                    connectors.append(Line(Point(*q1), Point(*q2)))
+        
+        return connectors
     
     def to_numpy(self):
         """Export all beam positions as single numpy array for optimization."""
