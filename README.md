@@ -1,6 +1,6 @@
 # Reciprocal Frame Solver
 
-A COMPAS-based solver for generating reciprocal frame structures from triangulated meshes.
+A COMPAS-based solver for generating reciprocal frame structures from meshes.
 
 Based on and inspired by the **Future tree** and the algorithms by Aleksandra Anna Apolinarska (ETH Zurich).
 
@@ -148,6 +148,41 @@ $$r_{ws} = w_s \cdot (z - z_{srf})$$
 compas >= 2.0
 scipy >= 1.0
 numpy >= 1.20
+```
+
+## Example Usage
+
+```python
+from compas.datastructures import Mesh
+from core_graph import ReciprocalFrame
+
+# Create or load a mesh
+mesh = #...
+
+# Optional: set engagement parameter per face
+for fkey in mesh.faces():
+    mesh.face_attribute(fkey, 'xi', 0.3)
+
+# Build reciprocal frame from mesh
+rf = ReciprocalFrame.from_mesh(mesh)
+
+# Solve with custom weights
+info = rf.solve(
+    weights=(1.0, 0.1, 0.1, 0.0),  # (wt, we, wf, ws)
+    eccentricity=0.00,             # min beam separation
+    srf=None                       # surface (optional)
+)
+
+print(f"Converged: {info['converged']}, Residual: {info['residual']:.6f}")
+
+# Export geometry
+beams = rf.to_lines()                    # beam axes as COMPAS Lines
+connectors = rf.get_connection_lines()   # eccentricity lines between beams
+
+# Access individual beams
+for key in rf.nodes():
+    line = rf.get_beam(key)
+    print(f"Beam {key}: {line.start} -> {line.end}")
 ```
 
 ## Files
