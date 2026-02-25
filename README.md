@@ -77,7 +77,7 @@ flowchart TD
 
 ### 1. The Engagement Parameter (ξ)
 
-The key parameter `xi` (ξ) controls where beam endpoints land on their supporting beams:
+The key parameter `xi` (ξ) controls where beam endpoints land on their supporting beams (parameter between 0 to 1 corresponding to point along length of beam from start to midpoint):
 
 **Target point formula:**
 
@@ -122,7 +122,7 @@ $$t_{proj} = \text{clamp}\left(\frac{(\mathbf{p} - \mathbf{a}) \cdot (\mathbf{b}
 
 $$\text{dist} = |\mathbf{p} - (\mathbf{a} + t_{proj} \cdot (\mathbf{b} - \mathbf{a}))|$$
 
-**1 residual per connection.** Default $d_{min} = 0.03$ (30mm).
+**1 residual per connection.** Default $d_{min} = 0.0$ (0mm).
 
 #### 3.3 Fidelity (wf) — Regularization
 
@@ -192,7 +192,8 @@ reciprocal_from_mesh/
 ├── __init__.py          # exports ReciprocalFrame, reciprocal_from_mesh
 ├── core_graph.py        # main implementation (ReciprocalFrame class)
 ├── gh_component.py      # Grasshopper wrapper script
-└── README.md            # this file
+├── .gitignore           
+└── README.md            
 ```
 
 

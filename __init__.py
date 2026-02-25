@@ -6,6 +6,6 @@ A COMPAS-based solver for generating reciprocal frame structures from triangulat
 """
 
 
-from .core_graph import ReciprocalFrame, reciprocal_from_mesh
+from .core_graph import ReciprocalFrame
 
-__all__ = ["ReciprocalFrame", "reciprocal_from_mesh"]
+__all__ = ["ReciprocalFrame"]
